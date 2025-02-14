@@ -25,15 +25,27 @@ import {
   handleFormSubmission,
   SuccessPage,
 } from "./components/ContactFormSubmit";
-import { UserProvider } from "./store/UserContext";
+import { UserProvider, useUser } from "./store/UserContext";
+import Login from "./components/Login";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 // Layout Component
 function Layout() {
+  const { isLoggedIn, user, logout } = useUser();
+
   return (
     <div>
       <nav>
         <Link to="/">Home</Link> | <Link to="/about">About</Link> |{" "}
-        <Link to="/contact">Contact</Link>
+        <Link to="/contact">Contact</Link> |{" "}
+        {isLoggedIn ? (
+          <>
+            <span>Welcome, {user}!</span>
+            <button onClick={logout}>Logout</button>
+          </>
+        ) : (
+          <Link to="/login">Login</Link>
+        )}
       </nav>
       <hr />
       <Outlet /> {/* The Outlet component renders the matched child route */}
@@ -48,7 +60,7 @@ function Home() {
       <h2>Home Page</h2>
       <Link to="/dashboard">Go to Dashboard</Link>
       <br />
-      <Link to="/fetch">Fech Posts</Link>
+      <Link to="/fetch">Fetch Posts</Link>
       <br />
       <Link to="/users">Users</Link>
       <br />
@@ -69,29 +81,49 @@ function Contact() {
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <Layout />,
+    element: (
+      <ProtectedRoute>
+        <Layout />
+      </ProtectedRoute>
+    ),
     children: [
-      { index: true, element: <Home /> }, // Default route
+      { index: true, element: <Home /> }, // Default route after login
       { path: "about", element: <About /> },
       { path: "contact", element: <Contact /> },
     ],
   },
   {
-    path: "dashboard",
-    element: <DashboardLayout />,
+    path: "/login",
+    element: <Login />, // Default route
+  },
+  {
+    path: "/dashboard",
+    element: (
+      <ProtectedRoute>
+        <DashboardLayout />
+      </ProtectedRoute>
+    ),
     children: [
       { index: true, element: <DashboardHome /> }, // Default dashboard view
       { path: "settings", element: <DashboardSettings /> },
     ],
   },
   {
-    path: "fetch",
-    element: <Posts />,
-    loader: fetchPosts, // Proper use of loader
+    path: "/fetch",
+    element: (
+      <ProtectedRoute>
+        <Posts />
+      </ProtectedRoute>
+    ),
+    loader: fetchPosts,
   },
   {
-    path: "users",
-    element: <UserFetch />,
+    path: "/users",
+    element: (
+      <ProtectedRoute>
+        <UserFetch />
+      </ProtectedRoute>
+    ),
     children: [
       { index: true, element: <Users />, loader: fetchUsers },
       {
@@ -103,12 +135,16 @@ const router = createBrowserRouter([
     ],
   },
   {
-    path: "form",
-    element: <ContactForm />,
+    path: "/form",
+    element: (
+      <ProtectedRoute>
+        <ContactForm />
+      </ProtectedRoute>
+    ),
     action: handleFormSubmission,
   },
   {
-    path: "success",
+    path: "/success",
     element: <SuccessPage />,
   },
 ]);
