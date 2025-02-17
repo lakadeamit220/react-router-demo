@@ -1,15 +1,24 @@
-import React from "react";
+import React, { Suspense } from "react";
 import {
   createBrowserRouter,
   Outlet,
   Link,
   RouterProvider,
 } from "react-router-dom";
-import {
-  DashboardLayout,
-  DashboardHome,
-  DashboardSettings,
-} from "./components/DashboardLayout";
+const DashboardLayout = React.lazy(() =>
+  import("./components/DashboardLayout")
+);
+const DashboardHome = React.lazy(() =>
+  import("./components/DashboardLayout").then((module) => ({
+    default: module.DashboardHome,
+  }))
+);
+const DashboardSettings = React.lazy(() =>
+  import("./components/DashboardLayout").then((module) => ({
+    default: module.DashboardSettings,
+  }))
+);
+
 import { Posts, fetchPosts } from "./components/DataFetchLoader";
 import {
   ErrorFallback,
@@ -28,6 +37,8 @@ import {
 import { UserProvider, useUser } from "./store/UserContext";
 import Login from "./components/Login";
 import ProtectedRoute from "./components/ProtectedRoute";
+import LoadingMain from "./components/LoadingMain";
+import { MantineProvider } from "@mantine/core";
 
 // Layout Component
 function Layout() {
@@ -99,9 +110,11 @@ const router = createBrowserRouter([
   {
     path: "/dashboard",
     element: (
-      <ProtectedRoute>
-        <DashboardLayout />
-      </ProtectedRoute>
+      <Suspense fallback={<LoadingMain />}>
+        <ProtectedRoute>
+          <DashboardLayout />
+        </ProtectedRoute>
+      </Suspense>
     ),
     children: [
       { index: true, element: <DashboardHome /> }, // Default dashboard view
@@ -152,9 +165,11 @@ const router = createBrowserRouter([
 // App Component
 function App() {
   return (
-    <UserProvider>
-      <RouterProvider router={router} />
-    </UserProvider>
+    <MantineProvider>
+      <UserProvider>
+        <RouterProvider router={router} />
+      </UserProvider>
+    </MantineProvider>
   );
 }
 

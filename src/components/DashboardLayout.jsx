@@ -26,12 +26,12 @@ function DashboardLayout() {
 }
 
 // Page Components
-function DashboardHome() {
+export const DashboardHome = () => {
   return <h2>Dashboard Home</h2>;
-}
+};
 
-function DashboardSettings() {
+export const DashboardSettings = () => {
   return <h2>Dashboard Settings</h2>;
-}
+};
 
-export { DashboardLayout, DashboardHome, DashboardSettings };
+export default DashboardLayout;
