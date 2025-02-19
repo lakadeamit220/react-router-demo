@@ -39,10 +39,12 @@ import Login from "./components/Login";
 import ProtectedRoute from "./components/ProtectedRoute";
 import LoadingMain from "./components/LoadingMain";
 import { MantineProvider } from "@mantine/core";
+import Logout from "./components/Logout";
+import Register from "./components/Register"; // Import Register component
 
 // Layout Component
 function Layout() {
-  const { isLoggedIn, user, logout } = useUser();
+  const { isLoggedIn, user } = useUser();
 
   return (
     <div>
@@ -51,11 +53,14 @@ function Layout() {
         <Link to="/contact">Contact</Link> |{" "}
         {isLoggedIn ? (
           <>
-            <span>Welcome, {user}!</span>
-            <button onClick={logout}>Logout</button>
+            <span>Welcome, {user?.username}!</span>
+            <Logout />
           </>
         ) : (
-          <Link to="/login">Login</Link>
+          <>
+            <Link to="/login">Login</Link> |{" "}
+            <Link to="/register">Register</Link> {/* Register link */}
+          </>
         )}
       </nav>
       <hr />
@@ -93,9 +98,9 @@ const router = createBrowserRouter([
   {
     path: "/",
     element: (
-      <ProtectedRoute>
+      // <ProtectedRoute>
         <Layout />
-      </ProtectedRoute>
+      // </ProtectedRoute>
     ),
     children: [
       { index: true, element: <Home /> }, // Default route after login
@@ -106,6 +111,10 @@ const router = createBrowserRouter([
   {
     path: "/login",
     element: <Login />, // Default route
+  },
+  {
+    path: "/register", // Register route
+    element: <Register />,
   },
   {
     path: "/dashboard",

@@ -1,34 +1,49 @@
 import React, { useState } from "react";
-import { useUser } from "../store/UserContext";
+import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { useUser } from "../store/UserContext";
 
 function Login() {
   const [username, setUsername] = useState("");
-  const { login } = useUser();
+  const [password, setPassword] = useState("");
+  const { setIsLoggedIn, setUser } = useUser();
   const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
-    login(username);
-    navigate("/"); // Redirect to home after login
+    try {
+      const response = await axios.post("http://localhost:5000/login", {
+        username,
+        password,
+      });
+      console.log("Response: ", response);
+      localStorage.setItem("token", response.data.token); // Save JWT to localStorage
+      setIsLoggedIn(true);
+      setUser(response.data.user);
+      navigate("/"); // Redirect to protected page
+    } catch (error) {
+      alert("Login failed. " + error.response.data.message);
+    }
   };
 
   return (
-    <div>
-      <h2>Login</h2>
-      <form onSubmit={handleSubmit}>
-        <label>
-          Username:
-          <input
-            type="text"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            required
-          />
-        </label>
-        <button type="submit">Login</button>
-      </form>
-    </div>
+    <form onSubmit={handleLogin}>
+      <input
+        type="text"
+        value={username}
+        onChange={(e) => setUsername(e.target.value)}
+        placeholder="Username"
+        required
+      />
+      <input
+        type="password"
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+        placeholder="Password"
+        required
+      />
+      <button type="submit">Login</button>
+    </form>
   );
 }
 
